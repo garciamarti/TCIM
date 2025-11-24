@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Script para agrupar y contar estudios por categoría y subcategoría. Esto se hizo para el proyecto de la clase de Análisis de Datos de la Universidad de Chile.
+
 """
 
 import csv
