@@ -1,0 +1,1825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Chart - Studies by Category</title>
+    <!-- Cargar Plotly desde CDN (versión 2.27.0 - compatible con plotly Python 6.5.0) -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .info {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        #detalles {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #ecf0f1;
+            border-radius: 8px;
+            display: none;
+        }
+        #detalles h2 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        .subcategoria-item {
+            padding: 8px;
+            margin: 5px 0;
+            background-color: white;
+            border-left: 4px solid #3498db;
+            border-radius: 4px;
+        }
+        .subcategoria-nombre {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .subcategoria-count {
+            color: #7f8c8d;
+            margin-left: 10px;
+        }
+        .click-instruction {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            color: #2e7d32;
+        }
+        #grafico {
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        #grafico .plotly {
+            border-radius: 8px;
+        }
+        #tabla-estudios {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            display: none;
+        }
+        #tabla-estudios h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        .tabla-container {
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        table thead {
+            background-color: #3498db;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        table td {
+            padding: 10px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        table tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .badge-high {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .badge-moderate {
+            background-color: #f39c12;
+            color: white;
+        }
+        .badge-low {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .badge-na {
+            background-color: #95a5a6;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Distribution of Studies by Category</h1>
+        <p class="info">Total studies analyzed: 195</p>
+        <div class="click-instruction">
+            💡 <strong>Click on any bar</strong> to view subcategory details and the complete table of studies
+        </div>
+        <div id="grafico"><div>                            <div id="f2b674ef-8e50-4c1e-92ce-af9b8027220f" class="plotly-graph-div" style="height:600px; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("f2b674ef-8e50-4c1e-92ce-af9b8027220f")) {                    Plotly.newPlot(                        "f2b674ef-8e50-4c1e-92ce-af9b8027220f",                        [{"customdata":[0,1,2,3,4,5],"hoverinfo":"text","hovertext":["\u003cb\u003eEvidence Integration & Generation\u003c\u002fb\u003e\u003cbr\u003eTotal: 62 studies (31.8%)\u003cbr\u003e\u003cbr\u003eSubcategories:\u003cbr\u003e  \u2022 Evidence gap identification: 21\u003cbr\u003e  \u2022 RWE integration & infrastructure: 20\u003cbr\u003e  \u2022 Uncertainty & limited evidence methods: 18\u003cbr\u003e  \u2022 Causal inference & effect estimation: 2\u003cbr\u003e  \u2022 Synthetic \u002f simulated evidence approaches: 1","\u003cb\u003eHTA Process Improvements\u003c\u002fb\u003e\u003cbr\u003eTotal: 51 studies (26.2%)\u003cbr\u003e\u003cbr\u003eSubcategories:\u003cbr\u003e  \u2022 Stakeholder collaboration frameworks: 30\u003cbr\u003e  \u2022 Transparency & methodological quality standards: 9\u003cbr\u003e  \u2022 Priority-setting & system strengthening: 6\u003cbr\u003e  \u2022 National HTA guideline frameworks: 5\u003cbr\u003e  \u2022 Lifecycle HTA: 1","\u003cb\u003eValue & Decision-Making Frameworks\u003c\u002fb\u003e\u003cbr\u003eTotal: 34 studies (17.4%)\u003cbr\u003e\u003cbr\u003eSubcategories:\u003cbr\u003e  \u2022 Patient-centered valuation: 15\u003cbr\u003e  \u2022 MCDA \u002f structured multi-criteria frameworks: 13\u003cbr\u003e  \u2022 Equity lenses \u002f DCEA: 3\u003cbr\u003e  \u2022 Expanded value frameworks: 3","\u003cb\u003eComplex & Emerging Technologies\u003c\u002fb\u003e\u003cbr\u003eTotal: 26 studies (13.3%)\u003cbr\u003e\u003cbr\u003eSubcategories:\u003cbr\u003e  \u2022 Emerging innovation risk & implementation frameworks: 16\u003cbr\u003e  \u2022 Simulation \u002f high-performance computing: 5\u003cbr\u003e  \u2022 Digital health \u002f AI evaluation frameworks: 3\u003cbr\u003e  \u2022 EHR-integrated innovation evaluation: 1\u003cbr\u003e  \u2022 Precision medicine \u002f genomic frameworks: 1","\u003cb\u003ePolicy, Coverage & Reimbursement\u003c\u002fb\u003e\u003cbr\u003eTotal: 12 studies (6.2%)\u003cbr\u003e\u003cbr\u003eSubcategories:\u003cbr\u003e  \u2022 Pricing frameworks \u002f opportunity cost: 7\u003cbr\u003e  \u2022 Coverage pathways & funding models: 3\u003cbr\u003e  \u2022 Outcome-based agreements (OBA): 2","\u003cb\u003eUnclassified\u003c\u002fb\u003e\u003cbr\u003eTotal: 10 studies (5.1%)\u003cbr\u003e\u003cbr\u003eSubcategories:\u003cbr\u003e  \u2022 Unclassified: 10"],"marker":{"color":["#3498db","#2980b9","#5dade2","#1abc9c","#16a085","#27ae60"],"line":{"color":"#2980b9","width":2},"opacity":0.85},"text":["62\u003cbr\u003e(31.8%)","51\u003cbr\u003e(26.2%)","34\u003cbr\u003e(17.4%)","26\u003cbr\u003e(13.3%)","12\u003cbr\u003e(6.2%)","10\u003cbr\u003e(5.1%)"],"textfont":{"color":"#2c3e50","family":"Segoe UI, Tahoma, Geneva, Verdana, sans-serif","size":11},"textposition":"outside","x":["Evidence Integration & Generation","HTA Process Improvements","Value & Decision-Making Frameworks","Complex & Emerging Technologies","Policy, Coverage & Reimbursement","Unclassified"],"y":[62,51,34,26,12,10],"type":"bar"}],                        {"font":{"family":"Segoe UI, Tahoma, Geneva, Verdana, sans-serif"},"height":600,"hoverlabel":{"bgcolor":"#2c3e50","font":{"color":"white","family":"Segoe UI, Tahoma, Geneva, Verdana, sans-serif","size":12}},"hovermode":"closest","margin":{"b":120,"l":80,"pad":10,"r":40,"t":120},"paper_bgcolor":"#ffffff","plot_bgcolor":"#ffffff","template":{"data":{"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"#E5ECF6","showlakes":true,"showland":true,"subunitcolor":"white"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"bgcolor":"#E5ECF6","radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","gridwidth":2,"linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white"},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","gridwidth":2,"linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white"},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","gridwidth":2,"linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"bgcolor":"#E5ECF6","caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","zerolinewidth":2}}},"title":{"font":{"color":"#2c3e50","family":"Segoe UI, Tahoma, Geneva, Verdana, sans-serif","size":22,"weight":"bold"},"text":"Distribution of Studies by Category","x":0.5,"xanchor":"center"},"xaxis":{"gridcolor":"#ecf0f1","gridwidth":1,"linecolor":"#bdc3c7","linewidth":1,"showgrid":true,"tickangle":-45,"tickfont":{"color":"#34495e","family":"Segoe UI, Tahoma, Geneva, Verdana, sans-serif","size":12},"title":{"font":{"color":"#2c3e50","family":"Segoe UI, Tahoma, Geneva, Verdana, sans-serif","size":15},"text":"Categories"}},"yaxis":{"gridcolor":"#ecf0f1","gridwidth":1,"linecolor":"#bdc3c7","linewidth":1,"range":[0,71.3],"showgrid":true,"tickfont":{"color":"#34495e","family":"Segoe UI, Tahoma, Geneva, Verdana, sans-serif","size":12},"title":{"font":{"color":"#2c3e50","family":"Segoe UI, Tahoma, Geneva, Verdana, sans-serif","size":15},"text":"Number of Studies"}}},                        {"responsive": true}                    )                };            </script>        </div></div>
+        <div id="detalles">
+            <h2 id="detalles-titulo"></h2>
+            <div id="detalles-contenido"></div>
+        </div>
+        <div id="tabla-estudios">
+            <h2 id="tabla-titulo"></h2>
+            <div class="tabla-container">
+                <table id="tabla-estudios-content">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Year</th>
+                            <th>Subcategory</th>
+                            <th>TCIM Suitability Level</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-estudios-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Subcategory data
+        const datosSubcategorias = {
+        "Evidence Integration & Generation": {
+                "subcategorias": [
+                        {
+                                "nombre": "Evidence gap identification",
+                                "count": 21
+                        },
+                        {
+                                "nombre": "RWE integration & infrastructure",
+                                "count": 20
+                        },
+                        {
+                                "nombre": "Uncertainty & limited evidence methods",
+                                "count": 18
+                        },
+                        {
+                                "nombre": "Causal inference & effect estimation",
+                                "count": 2
+                        },
+                        {
+                                "nombre": "Synthetic / simulated evidence approaches",
+                                "count": 1
+                        }
+                ],
+                "total": 62,
+                "estudios": [
+                        {
+                                "title": "Advancing health technology assessment methods that support health equity",
+                                "author": "Agboola, F.",
+                                "year": "2023",
+                                "subcategory": "Evidence gap identification",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Disruptive supply chain technology assessment for sustainability journey: A framework of probabilistic group decision making",
+                                "author": "Ahmed, H. N.",
+                                "year": "2024",
+                                "subcategory": "Uncertainty & limited evidence methods",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Using Real-World Data in the Health Technology Assessment of Pharmaceuticals: Strengths, Difficulties, and a Pragmatic Way Forward",
+                                "author": "Akehurst, R.",
+                                "year": "2023",
+                                "subcategory": "RWE integration & infrastructure",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "A Case for Synthetic Data in Regulatory Decision-Making in Europe",
+                                "author": "Alloza, C.",
+                                "year": "2023",
+                                "subcategory": "RWE integration & infrastructure",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "The Evolving Nature of Health Technology Assessment: A Critical Appraisal of NICE's New Methods Manual",
+                                "author": "Angelis, A.",
+                                "year": "2023",
+                                "subcategory": "RWE integration & infrastructure",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "TRUST4RD: tool for reducing uncertainties in the evidence generation for specialised treatments for rare diseases",
+                                "author": "Annemans, L.",
+                                "year": "2020",
+                                "subcategory": "RWE integration & infrastructure",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Portfolio frontier analysis: Applying mean-variance analysis to health technology assessment for health systems under pressure",
+                                "author": "Baines, D.",
+                                "year": "2021",
+                                "subcategory": "RWE integration & infrastructure",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Research Method, Conduct, and Reporting Considerations for Improving the Quality of Non-Hypothesis-Evaluating Treatment Effectiveness Analyses Using Real-World Data: An ISPOR Special Interest Group Report",
+                                "author": "Barrette, E.",
+                                "year": "2025",
+                                "subcategory": "RWE integration & infrastructure",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "A roadmap for personalized medicine: the findings of the IC2PerMed project",
+                                "author": "Beccia, F.",
+                                "year": "2025",
+                                "subcategory": "Evidence gap identification",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Development of a checklist to guide equity considerations in health technology assessment",
+                                "author": "Benkhalti, M.",
+                                "year": "2021",
+                                "subcategory": "Evidence gap identification",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Regulatory and HTA early dialogues in medical devices",
+                                "author": "Blankart, C. R.",
+                                "year": "2021",
+                                "subcategory": "Uncertainty & limited evidence methods",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Strengthening health technology assessment for cancer treatments in Europe by integrating causal inference and target trial emulation",
+                                "author": "Bucher, H. C.",
+                                "year": "2025",
+                                "subcategory": "Causal inference & effect estimation",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Real-world evidence for regulatory decision-making: updated guidance from around the world",
+                                "author": "Burns, L.",
+                                "year": "2023",
+                                "subcategory": "RWE integration & infrastructure",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "FRAME: Framework for Real-World Evidence Assessment to Mitigate Evidence Uncertainties for Efficacy/Effectiveness - An Evaluation of Regulatory and Health Technology Assessment Decision Making",
+                                "author": "Candore, G.",
+                                "year": "2025",
+                                "subcategory": "RWE integration & infrastructure",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Balancing innovation and ethics in AI governance for health technology assessment",
+                                "author": "Carapinha, J. L.",
+                                "year": "2024",
+                                "subcategory": "Evidence gap identification",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Challenges and Opportunities in Interdisciplinary Research and Real-World Data for Treatment Sequences in Health Technology Assessments",
+                                "author": "Chang, J. A.",
+                                "year": "2024",
+                                "subcategory": "RWE integration & infrastructure",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Methods for the estimation of the National Institute for Health and Care Excellence cost-effectiveness threshold",
+                                "author": "Claxton, K.",
+                                "year": "2015",
+                                "subcategory": "Uncertainty & limited evidence methods",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Decision Frameworks for Assessing Cost-Effectiveness Given Previous Nonoptimal Decisions",
+                                "author": "Coyle, D.",
+                                "year": "2025",
+                                "subcategory": "Synthetic / simulated evidence approaches",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Considerations for Developing a Reassessment Process: Report from the Canadian Real-World Evidence for Value of Cancer Drugs (CanREValue) Collaboration's Reassessment and Uptake Working Group",
+                                "author": "Dai, W. F.",
+                                "year": "2021",
+                                "subcategory": "RWE integration & infrastructure",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Capturing what matters: updating NICE methods guidance on measuring and valuing health",
+                                "author": "Dawoud, D.",
+                                "year": "2022",
+                                "subcategory": "Evidence gap identification",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Use of Real-World Evidence in US Payer Coverage Decision-Making for Next-Generation Sequencing-Based Tests: Challenges, Opportunities, and Potential Solutions",
+                                "author": "Deverka, P. A.",
+                                "year": "2020",
+                                "subcategory": "Evidence gap identification",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Making Drug Approval Decisions in the Face of Uncertainty: Cumulative Evidence versus Value of Information",
+                                "author": "Dijk, S. W.",
+                                "year": "2024",
+                                "subcategory": "Uncertainty & limited evidence methods",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Integrating Environmental Impact in Health Technology Assessment: An Exploratory Study",
+                                "author": "Ducrot, C.",
+                                "year": "2025",
+                                "subcategory": "Uncertainty & limited evidence methods",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Health Innovation Next Generation Payment & Pricing Models (HI-PRIX): Balancing Sustainability of Innovation with Sustainability of Health Care",
+                                "author": "Fabian, D.",
+                                "year": "2024",
+                                "subcategory": "Evidence gap identification",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Health technology assessment of diagnostic tests: a state of the art review of methods guidance from international organizations",
+                                "author": "Ferrante di Ruffano, L.",
+                                "year": "2023",
+                                "subcategory": "RWE integration & infrastructure",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Increasing transparency in indirect treatment comparisons: is selecting effect modifiers the missing part of the puzzle? A review of methodological approaches and critical considerations",
+                                "author": "Freitag, A.",
+                                "year": "2023",
+                                "subcategory": "Evidence gap identification",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Beyond clinical and cost-effectiveness: The contribution of qualitative research to health technology assessment",
+                                "author": "Germeni, E.",
+                                "year": "2023",
+                                "subcategory": "Evidence gap identification",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "State of the ART? Two New Tools for Risk Communication in Health Technology Assessments",
+                                "author": "Grimm, S. E.",
+                                "year": "2021",
+                                "subcategory": "RWE integration & infrastructure",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "The HTA Risk Analysis Chart: Visualising the Need for and Potential Value of Managed Entry Agreements in Health Technology Assessment",
+                                "author": "Grimm, S. E.",
+                                "year": "2017",
+                                "subcategory": "Uncertainty & limited evidence methods",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Analytical Methods for Comparing Uncontrolled Trials With External Controls From Real-World Data: A Systematic Literature Review and Comparison With European Regulatory and Health Technology Assessment Practice",
+                                "author": "Hogervorst, M. A.",
+                                "year": "2025",
+                                "subcategory": "RWE integration & infrastructure",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Ethical and legal considerations in social media research for health technology assessment: conclusions from a scoping review",
+                                "author": "Holtorf, A. P.",
+                                "year": "2023",
+                                "subcategory": "Evidence gap identification",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Technology assessment framework for precision health applications",
+                                "author": "Hussain, M. S.",
+                                "year": "2021",
+                                "subcategory": "Evidence gap identification",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "An approach to quantify parameter uncertainty in early assessment of novel health technologies",
+                                "author": "Iskandar, R.",
+                                "year": "2022",
+                                "subcategory": "Uncertainty & limited evidence methods",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "AI for IMPACTS Framework for Evaluating the Long-Term Real-World Impacts of AI-Powered Clinician Tools: Systematic Review and Narrative Synthesis",
+                                "author": "Jacob, C.",
+                                "year": "2025",
+                                "subcategory": "RWE integration & infrastructure",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Understanding innovation of health technology assessment methods: the IHTAM framework",
+                                "author": "Jiu, L.",
+                                "year": "2022",
+                                "subcategory": "Evidence gap identification",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Early-stage assessment of investigational digital technologies in mental health: a guide for innovators",
+                                "author": "Kal�, Z.",
+                                "year": "2025",
+                                "subcategory": "Evidence gap identification",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Optimization of pharmaceutical research and development by early-phase assessment of investigational medicinal products",
+                                "author": "Kal�, Z.",
+                                "year": "2025",
+                                "subcategory": "Uncertainty & limited evidence methods",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "The use of rapid review methods in health technology assessments: 3 case studies",
+                                "author": "Kaltenthaler, E.",
+                                "year": "2016",
+                                "subcategory": "Evidence gap identification",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Health Technology Assessment With Diminishing Returns to Health: The Generalized Risk-Adjusted Cost-Effectiveness (GRACE) Approach",
+                                "author": "Lakdawalla, D. N.",
+                                "year": "2021",
+                                "subcategory": "Uncertainty & limited evidence methods",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Defining Elements of Value in Health Care-A Health Economics Approach: An ISPOR Special Task Force Report [3]",
+                                "author": "Lakdawalla, D. N.",
+                                "year": "2018",
+                                "subcategory": "Uncertainty & limited evidence methods",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "The Composite Digital Therapeutic Index (cDTI): A Multidimensional Framework and Proof-of-Concept Application to FDA-Authorized Treatments",
+                                "author": "Lakhan, S. E.",
+                                "year": "2025",
+                                "subcategory": "RWE integration & infrastructure",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "How Similar is Similar Enough? Assessment of Indirect Treatment Comparisons to Support Similarity for National Institute for Health and Care Excellence's Cost Comparison Route",
+                                "author": "Lee, D.",
+                                "year": "2025",
+                                "subcategory": "Uncertainty & limited evidence methods",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "HTA responsiveness to today's challenges to health systems: a responsible innovation in health perspective",
+                                "author": "Lehoux, P.",
+                                "year": "2025",
+                                "subcategory": "Evidence gap identification",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Early technology review: towards an expedited pathway",
+                                "author": "Levin, L.",
+                                "year": "2024",
+                                "subcategory": "Evidence gap identification",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Incorporating Real Option Value in Valuing Innovation: A Way Forward",
+                                "author": "Li, M.",
+                                "year": "2024",
+                                "subcategory": "Uncertainty & limited evidence methods",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "A comparison of reweighting estimators of average treatment effects in real world populations",
+                                "author": "Lin, C. Y.",
+                                "year": "2021",
+                                "subcategory": "Causal inference & effect estimation",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Early cost-effectiveness modeling for better decisions in public research investment of personalized medicine technologies",
+                                "author": "Ling, D. I.",
+                                "year": "2019",
+                                "subcategory": "Uncertainty & limited evidence methods",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Incorporating Affordability Concerns Within Cost-Effectiveness Analysis for Health Technology Assessment",
+                                "author": "Lomas, J. R. S.",
+                                "year": "2019",
+                                "subcategory": "Uncertainty & limited evidence methods",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "A Research Framework to Improve Health Disparity Evidence Gaps in Value Assessments",
+                                "author": "Mattingly, T. J.",
+                                "year": "2024",
+                                "subcategory": "Evidence gap identification",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "The Development of a New Approach for the Harmonized Multi-Sectoral and Multi-Country Cost Valuation of Services: The PECUNIA Reference Unit Cost (RUC) Templates",
+                                "author": "Mayer, S.",
+                                "year": "2024",
+                                "subcategory": "Evidence gap identification",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "A critical assessment framework to identify, quantify and interpret the sources of uncertainty in cost-effectiveness analyses",
+                                "author": "Mer�sz, G.",
+                                "year": "2022",
+                                "subcategory": "Uncertainty & limited evidence methods",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Programme for the use of real world data in health technology assessment: using real-world data for health technology assessment",
+                                "author": "Mu�oz-Fern�ndez, C.",
+                                "year": "2025",
+                                "subcategory": "RWE integration & infrastructure",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Modelling approaches for histology-independent cancer drugs to inform NICE appraisals: a systematic review and decision-framework",
+                                "author": "Murphy, P.",
+                                "year": "2022",
+                                "subcategory": "Uncertainty & limited evidence methods",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Selecting Cost-Effectiveness Methods for Health Benefits Package Design: A Systematic Approach",
+                                "author": "Nemzoff, C.",
+                                "year": "2025",
+                                "subcategory": "Evidence gap identification",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Improving Transparency to Build Trust in Real-World Secondary Data Studies for Hypothesis Testing-Why, What, and How: Recommendations and a Road Map from the Real-World Evidence Transparency Initiative",
+                                "author": "Orsini, L. S.",
+                                "year": "2020",
+                                "subcategory": "RWE integration & infrastructure",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Development of a Multi-Criteria Decision Analysis Rating Tool to Prioritize Real-World Evidence Questions for the Canadian Real-World Evidence for Value of Cancer Drugs (CanREValue) Collaboration",
+                                "author": "Parmar, A.",
+                                "year": "2023",
+                                "subcategory": "RWE integration & infrastructure",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "A perspective on life-cycle health technology assessment and real-world evidence for precision oncology in Canada",
+                                "author": "Regier, D. A.",
+                                "year": "2022",
+                                "subcategory": "RWE integration & infrastructure",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Dealing With Uncertainty in Early Health Technology Assessment: An Exploration of Methods for Decision Making Under Deep Uncertainty",
+                                "author": "Scholte, M.",
+                                "year": "2023",
+                                "subcategory": "Uncertainty & limited evidence methods",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Methodological Frameworks and Dimensions to Be Considered in Digital Health Technology Assessment: Scoping Review and Thematic Analysis",
+                                "author": "Segur-Ferrer, J.",
+                                "year": "2024",
+                                "subcategory": "Evidence gap identification",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Hospital Investment Decisions in Healthcare 4.0 Technologies: Scoping Review and Framework for Exploring Challenges, Trends, and Research Directions",
+                                "author": "Vassolo, R. S.",
+                                "year": "2021",
+                                "subcategory": "Uncertainty & limited evidence methods",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "(Good) practice organisational models using real-world evidence for public funding of high priced therapies",
+                                "author": "Wohlh�fner, K.",
+                                "year": "2021",
+                                "subcategory": "RWE integration & infrastructure",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Development of a metric to evaluate the ergonomic principles of assistive systems, based on the DIN 92419",
+                                "author": "Xavier Macedo de Azevedo, F.",
+                                "year": "2023",
+                                "subcategory": "Evidence gap identification",
+                                "suitability": "High"
+                        }
+                ]
+        },
+        "HTA Process Improvements": {
+                "subcategorias": [
+                        {
+                                "nombre": "Stakeholder collaboration frameworks",
+                                "count": 30
+                        },
+                        {
+                                "nombre": "Transparency & methodological quality standards",
+                                "count": 9
+                        },
+                        {
+                                "nombre": "Priority-setting & system strengthening",
+                                "count": 6
+                        },
+                        {
+                                "nombre": "National HTA guideline frameworks",
+                                "count": 5
+                        },
+                        {
+                                "nombre": "Lifecycle HTA",
+                                "count": 1
+                        }
+                ],
+                "total": 51,
+                "estudios": [
+                        {
+                                "title": "A Step Toward the Development of the First National Multi-Criteria Decision Analysis Framework to Support Healthcare Decision Making in Saudi Arabia",
+                                "author": "Al-Jedai, A.",
+                                "year": "2024",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "To What Extent Can Digital Health Technologies Comply With the Principles of Responsible Innovation? Practice-and Policy-Oriented Research Insights Regarding an Organisational and Systemic Issue",
+                                "author": "Alami, H.",
+                                "year": "2024",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Est�ndares Consolidados de Reporte de Evaluaciones Econ�micas Sanitarias: adaptaci�n al espa�ol de la lista de comprobaci�n CHEERS 2022",
+                                "author": "Augustovski, F.",
+                                "year": "2022",
+                                "subcategory": "Transparency & methodological quality standards",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "National governance of de-implementation of low-value care: a qualitative study in Sweden",
+                                "author": "Augustsson, H.",
+                                "year": "2022",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Public values and plurality in health priority setting: What to do when people disagree and why we should care about reasons as well as choices",
+                                "author": "Baker, R.",
+                                "year": "2021",
+                                "subcategory": "Priority-setting & system strengthening",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Topic identification, selection, and prioritization for health technology assessment in selected countries: a mixed study design",
+                                "author": "Bidonde, J.",
+                                "year": "2024",
+                                "subcategory": "Priority-setting & system strengthening",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Lay and professional stakeholder involvement in scoping palliative care issues: Methods used in seven European countries",
+                                "author": "Brereton, L.",
+                                "year": "2017",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "An Attribution of Value Framework for Combination Treatments",
+                                "author": "Briggs, A. H.",
+                                "year": "2025",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Using INTEGRATE-HTA for the assessment of videorasterstereography in idiopathic scoliosis",
+                                "author": "Buchberger, B.",
+                                "year": "2021",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Development of stakeholder-informed recommendations for inclusion of family spillover effects in health technology assessment",
+                                "author": "Campbell, D. J.",
+                                "year": "2024",
+                                "subcategory": "Priority-setting & system strengthening",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "A multi-stakeholder approach in optimising patients' needs in the benefit assessment process of new metastatic breast cancer treatments",
+                                "author": "Cardoso, F.",
+                                "year": "2020",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "We need to talk about values: a proposed framework for the articulation of normative reasoning in health technology assessment",
+                                "author": "Charlton, V.",
+                                "year": "2024",
+                                "subcategory": "Priority-setting & system strengthening",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Evaluating the Value for Money of Precision Medicine from Early Cycle to Market Access: A Comprehensive Review of Approaches and Challenges",
+                                "author": "Chen, W.",
+                                "year": "2023",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "What could health technology assessment learn from living clinical practice guidelines?",
+                                "author": "Cheyne, S.",
+                                "year": "2023",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Plain language summaries supporting patient involvement: lessons and guidance from HTAi Patient and Citizen Involvement Interest Group (PCIG)",
+                                "author": "Coombes, M. A.",
+                                "year": "2025",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Adopting life-cycle HTA: a tumor-agnostic precision oncology index economic evaluation from publicly available reimbursement reviews",
+                                "author": "Cupples, G.",
+                                "year": "2025",
+                                "subcategory": "Transparency & methodological quality standards",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Verification of Decision-Analytic Models for Health Economic Evaluations: An Overview",
+                                "author": "Dasbach, E. J.",
+                                "year": "2017",
+                                "subcategory": "Transparency & methodological quality standards",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Challenges of Health Technology Assessment in Pluralistic Healthcare Systems: An ISPOR Council Report",
+                                "author": "Drummond, M. F.",
+                                "year": "2022",
+                                "subcategory": "Transparency & methodological quality standards",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Comprehensive analysis of frameworks for evaluating artificial intelligence solutions in Healthcare: A descriptive review",
+                                "author": "Fajkis-Zaj_czkowska, N.",
+                                "year": "2025",
+                                "subcategory": "National HTA guideline frameworks",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "VALIDATE approach on medication adequacy clinical decision support systems: Holistic assessment for optimal technology adoption",
+                                "author": "Fernandez-Barcelo, C.",
+                                "year": "2023",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "A Health Economics Approach to US Value Assessment Frameworks-Summary and Recommendations of the ISPOR Special Task Force Report [7]",
+                                "author": "Garrison, L. P.",
+                                "year": "2018",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "A Value Framework to Assess Patient-Facing Digital Health Technologies That Aim to Improve Chronic Disease Management: A Delphi Approach",
+                                "author": "Haig, M.",
+                                "year": "2023",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Consolidated Health Economic Evaluation Reporting Standards 2022 (CHEERS 2022) statement: updated reporting guidance for health economic evaluations",
+                                "author": "Husereau, D.",
+                                "year": "2022",
+                                "subcategory": "Transparency & methodological quality standards",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "The Full Value of Vaccine Assessments (FVVA): a framework for assessing and communicating the value of vaccines for investment and introduction decision-making",
+                                "author": "Hutubessy, R.",
+                                "year": "2023",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Multi-Criteria Decision Analysis: An emerging alternative for assessing the value of orphan medicinal products",
+                                "author": "Irwin, J.",
+                                "year": "2015",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Shaping a research agenda to ensure a successful European health technology assessment: insights generated during the inaugural convention of the European access academy",
+                                "author": "Julian, E.",
+                                "year": "2022",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "The Value of Explicit, Deliberative, and Context-Specified Ethics Analysis for Health Technology Assessment: Evidence From a Novel Approach Piloted in South Africa",
+                                "author": "Krubiner, C. B.",
+                                "year": "2023",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Developing and piloting a context-specified ethics framework for health technology assessment: the South African Values and Ethics for Universal Health Coverage approach",
+                                "author": "Krubiner, C. B.",
+                                "year": "2022",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Integrating Formal Technology Assessment into an Integrated Healthcare Delivery System: Smart Innovation",
+                                "author": "Landaas, E. J.",
+                                "year": "2020",
+                                "subcategory": "National HTA guideline frameworks",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Guiding Principles for Evaluating Vaccines in Joint Health Technology Assessment in the European Union: Preparing for the European Union's Regulation on Health Technology Assessment for Vaccines",
+                                "author": "Largeron, N.",
+                                "year": "2024",
+                                "subcategory": "National HTA guideline frameworks",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Opportunities to improve the adoption of health-related quality of life evidence as part of the French Health Technology Assessment process",
+                                "author": "Larose, H.",
+                                "year": "2023",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "The Sandbox Approach and its Potential for Use in Health Technology Assessment: A Literature Review",
+                                "author": "Leckenby, E.",
+                                "year": "2021",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Unlocking the full potential of digital endpoints for decision making: a novel modular evidence concept enabling re-use and advancing collaboration",
+                                "author": "Leyens, L.",
+                                "year": "2024",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Why Language Matters in Digital Endpoint Development: Harmonized Terminology as a Key Prerequisite for Evidence Generation",
+                                "author": "Leyens, L.",
+                                "year": "2024",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Creating sustainable health care systems",
+                                "author": "Littlejohns, P.",
+                                "year": "2019",
+                                "subcategory": "Priority-setting & system strengthening",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Is this test fit-for-purpose? Principles and a checklist for evaluating the clinical performance of a test in the new era of in vitro diagnostic (IVD) regulation",
+                                "author": "Lord, S. J.",
+                                "year": "2025",
+                                "subcategory": "National HTA guideline frameworks",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "[Not Available]",
+                                "author": "Mamzer, M. F.",
+                                "year": "2018",
+                                "subcategory": "Transparency & methodological quality standards",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Development of the Reliant Checklist: A Solution that Accounts for Implicit Factors in the Hta Deliberative Process",
+                                "author": "Monleon, C.",
+                                "year": "2024",
+                                "subcategory": "Transparency & methodological quality standards",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Development of a health technology assessment module for evaluating mobile medical applications",
+                                "author": "Moshi, M. R.",
+                                "year": "2020",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Putting meat on the bone: how to fast-track innovative medicines to those who need them and generate data to justify continued use",
+                                "author": "Ollendorf, D.",
+                                "year": "2024",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "The strategic relevance of manufacturing technology: An overall quality concept to promote innovation preventing drug shortage",
+                                "author": "Panzitta, M.",
+                                "year": "2017",
+                                "subcategory": "National HTA guideline frameworks",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Modifying NICE's Approach to Equity Weighting",
+                                "author": "Paulden, M.",
+                                "year": "2021",
+                                "subcategory": "Transparency & methodological quality standards",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Institute for Clinical and Economic Review - Peterson Health Technology Institute value assessment framework for digital health technologies",
+                                "author": "Pearson, S. D.",
+                                "year": "2023",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Benefits and harms of antenatal and newborn screening programmes in health economic assessments: the VALENTIA systematic review and qualitative investigation",
+                                "author": "Rivero-Arias, O.",
+                                "year": "2024",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Framework for Multistakeholder Patient Registries in the Field of Rare Diseases: Focus on Neurogenetic Diseases",
+                                "author": "Schoenmakers, D. H.",
+                                "year": "2024",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "A framework for action to improve patient and public involvement in health technology assessment",
+                                "author": "Silva, A. S.",
+                                "year": "2022",
+                                "subcategory": "Transparency & methodological quality standards",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "A tailored approach to horizon scanning for cancer medicines",
+                                "author": "Soon, J. A.",
+                                "year": "2023",
+                                "subcategory": "Priority-setting & system strengthening",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Living Health Technology Assessment: Issues, Challenges and Opportunities",
+                                "author": "Thokala, P.",
+                                "year": "2023",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Development of a decisional flowchart for meaningful patient involvement in Health Technology Assessment",
+                                "author": "Toledo-Ch�varri, A.",
+                                "year": "2020",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Stakeholder preferences for attributes of digital health technologies to consider in health service funding",
+                                "author": "von Huben, A.",
+                                "year": "2023",
+                                "subcategory": "Stakeholder collaboration frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Using the Dynamic SWOT Analysis to Assess Options for Implementing the HB-HTA Model",
+                                "author": "Wi_ckowska, B.",
+                                "year": "2022",
+                                "subcategory": "Lifecycle HTA",
+                                "suitability": "Moderate"
+                        }
+                ]
+        },
+        "Value & Decision-Making Frameworks": {
+                "subcategorias": [
+                        {
+                                "nombre": "Patient-centered valuation",
+                                "count": 15
+                        },
+                        {
+                                "nombre": "MCDA / structured multi-criteria frameworks",
+                                "count": 13
+                        },
+                        {
+                                "nombre": "Equity lenses / DCEA",
+                                "count": 3
+                        },
+                        {
+                                "nombre": "Expanded value frameworks",
+                                "count": 3
+                        }
+                ],
+                "total": 34,
+                "estudios": [
+                        {
+                                "title": "Estimating and Rewarding the Value of Healthcare Interventions Beyond the Healthcare Sector: A Conceptual Framework",
+                                "author": "Ali, A. A.",
+                                "year": "2024",
+                                "subcategory": "Equity lenses / DCEA",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Multiple Criteria Decision Analysis (MCDA) for evaluating new medicines in Health Technology Assessment and beyond: The Advance Value Framework",
+                                "author": "Angelis, A.",
+                                "year": "2017",
+                                "subcategory": "MCDA / structured multi-criteria frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Recommendations from the European Working Group for Value Assessment and Funding Processes in Rare Diseases (ORPH-VAL)",
+                                "author": "Annemans, L.",
+                                "year": "2017",
+                                "subcategory": "MCDA / structured multi-criteria frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "International lessons in new methods for grading and integrating cost effectiveness evidence into clinical practice guidelines",
+                                "author": "Antioch, K. M.",
+                                "year": "2017",
+                                "subcategory": "MCDA / structured multi-criteria frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Enhancing Patient Engagement in HTA: Using Consensus Research to Overcome PICO Scoping Challenges Under the EU HTAR",
+                                "author": "Arc�, E.",
+                                "year": "2025",
+                                "subcategory": "Patient-centered valuation",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Involving Patients in Hospital-Based Health Technology Assessment of Innovative Medical Devices: Adapting to a Specific Local Context and Lessons Learned From the Assessment of an Ex Vivo Perfusion System of Human Donor Hearts",
+                                "author": "Atfeh, J.",
+                                "year": "2024",
+                                "subcategory": "Patient-centered valuation",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Capturing the value of vaccination within health technology assessment and health economics: Literature review and novel conceptual framework",
+                                "author": "Beck, E.",
+                                "year": "2022",
+                                "subcategory": "Expanded value frameworks",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Realising the broader value of vaccines in the UK",
+                                "author": "Brassel, S.",
+                                "year": "2021",
+                                "subcategory": "Expanded value frameworks",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "An Evidence Framework for Off-Patent Pharmaceutical Review for Health Technology Assessment in Emerging Markets",
+                                "author": "Brixner, D.",
+                                "year": "2018",
+                                "subcategory": "MCDA / structured multi-criteria frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Generating comparative evidence on new drugs and devices after approval",
+                                "author": "Cipriani, A.",
+                                "year": "2020",
+                                "subcategory": "Patient-centered valuation",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "The validation of the Needs Examination, Evaluation, and Dissemination assessment framework within the European Union: a modified Delphi study",
+                                "author": "Claerman, R.",
+                                "year": "2025",
+                                "subcategory": "Patient-centered valuation",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Development of an international template to support patient submissions in Health Technology Assessments",
+                                "author": "Cook, N.",
+                                "year": "2021",
+                                "subcategory": "Patient-centered valuation",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "HTA methodology and value frameworks for evaluation and policy making for cell and gene therapies",
+                                "author": "Coyle, D.",
+                                "year": "2020",
+                                "subcategory": "MCDA / structured multi-criteria frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Patient-reported outcomes in vaccines research: relevance for decision-making",
+                                "author": "Curran, D.",
+                                "year": "2022",
+                                "subcategory": "Patient-centered valuation",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Research on the Construction of Comprehensive Evaluation Framework for Traditional Non-Pharmacological Tech-nology Based on Multi-Criteria Decision Analysis",
+                                "author": "Dandan, A. I.",
+                                "year": "2023",
+                                "subcategory": "MCDA / structured multi-criteria frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Integrating Patient Perspectives Into the Digital Health Technology Readiness Framework: Delphi Study",
+                                "author": "de la Torre, E.",
+                                "year": "2025",
+                                "subcategory": "Patient-centered valuation",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "The Impact of Recent Generic Drug Price Policies on Pharmaceutical Innovation: A Theoretical Rationale and Proposal of a Method Supporting Innovation in Areas of Unmet Medical Need",
+                                "author": "Dionne, P. A.",
+                                "year": "2015",
+                                "subcategory": "Patient-centered valuation",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "ASSESSMENT OF MAST IN EUROPEAN PATIENT-CENTERED TELEMEDICINE PILOTS",
+                                "author": "Ekeland, A. G.",
+                                "year": "2015",
+                                "subcategory": "Patient-centered valuation",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Toward comprehensive value assessment for Alzheimer's disease innovations",
+                                "author": "Ferrell, P. B.",
+                                "year": "2023",
+                                "subcategory": "MCDA / structured multi-criteria frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "[HERA-QUEST: HTA evaluation of generic pharmaceutical products to improve quality, economic efficiency, patient safety and transparency in drug product changes in hospitals]",
+                                "author": "Gyalrong-Steur, M.",
+                                "year": "2017",
+                                "subcategory": "Patient-centered valuation",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Conducting Economic Evaluations Alongside Randomised Trials: Current Methodological Issues and Novel Approaches",
+                                "author": "Hughes, D.",
+                                "year": "2016",
+                                "subcategory": "Patient-centered valuation",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "EUPATI Guidance for Patient Involvement in Medicines Research and Development: Health Technology Assessment",
+                                "author": "Hunter, A.",
+                                "year": "2018",
+                                "subcategory": "Patient-centered valuation",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Proposal for capturing patient experience through extended value frameworks of health technologies",
+                                "author": "Inotai, A.",
+                                "year": "2021",
+                                "subcategory": "MCDA / structured multi-criteria frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Multi-Criteria Decision Analysis for Assessment and Appraisal of Orphan Drugs",
+                                "author": "Iskrov, G.",
+                                "year": "2016",
+                                "subcategory": "MCDA / structured multi-criteria frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "National Immunization Program Decision Making Using the CAPACITI Decision-Support Tool: User Feedback from Indonesia and Ethiopia",
+                                "author": "Jansen, M.",
+                                "year": "2024",
+                                "subcategory": "MCDA / structured multi-criteria frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Advanced therapy medicinal products and health technology assessment principles and practices for value-based and sustainable healthcare",
+                                "author": "J�nsson, B.",
+                                "year": "2019",
+                                "subcategory": "Patient-centered valuation",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Use of the ESMO-Magnitude of Clinical Benefit Scale to guide HTA recommendations on coverage and reimbursement for cancer medicines: a retrospective analysis",
+                                "author": "Kanavos, P.",
+                                "year": "2024",
+                                "subcategory": "Expanded value frameworks",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Mixture and Non-mixture Cure Models for Health Technology Assessment: What You Need to Know",
+                                "author": "Latimer, N. R.",
+                                "year": "2024",
+                                "subcategory": "Patient-centered valuation",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Aggregate Distributional Cost-Effectiveness Analysis of Health Technologies",
+                                "author": "Love-Koh, J.",
+                                "year": "2019",
+                                "subcategory": "Equity lenses / DCEA",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Reconstructing the value puzzle in health technology assessment: a pragmatic review to determine which modelling methods can account for additional value elements",
+                                "author": "Muir, J. M.",
+                                "year": "2023",
+                                "subcategory": "MCDA / structured multi-criteria frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "A Taxonomy for Assessing Whether HRQoL Value Sets Are Obsolete",
+                                "author": "Norman, R.",
+                                "year": "2025",
+                                "subcategory": "Patient-centered valuation",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Valuing the Societal Impact of Medicines and Other Health Technologies: A User Guide to Current Best Practices",
+                                "author": "Shafrin, J.",
+                                "year": "2024",
+                                "subcategory": "Equity lenses / DCEA",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Ranking Decision-Making Criteria for Early Adoption of Innovative Surgical Technologies",
+                                "author": "Shoman, H.",
+                                "year": "2023",
+                                "subcategory": "MCDA / structured multi-criteria frameworks",
+                                "suitability": "High"
+                        },
+                        {
+                                "title": "Construction and Interpretation of Clinical Comprehensive Evaluation Index System for Chinese Patent Medicine Based on EVIDEM Framework",
+                                "author": "Zeqi, D. A. I.",
+                                "year": "2024",
+                                "subcategory": "MCDA / structured multi-criteria frameworks",
+                                "suitability": "High"
+                        }
+                ]
+        },
+        "Complex & Emerging Technologies": {
+                "subcategorias": [
+                        {
+                                "nombre": "Emerging innovation risk & implementation frameworks",
+                                "count": 16
+                        },
+                        {
+                                "nombre": "Simulation / high-performance computing",
+                                "count": 5
+                        },
+                        {
+                                "nombre": "Digital health / AI evaluation frameworks",
+                                "count": 3
+                        },
+                        {
+                                "nombre": "EHR-integrated innovation evaluation",
+                                "count": 1
+                        },
+                        {
+                                "nombre": "Precision medicine / genomic frameworks",
+                                "count": 1
+                        }
+                ],
+                "total": 26,
+                "estudios": [
+                        {
+                                "title": "In Silico Clinical Trials: Is It Possible?",
+                                "author": "Ars�ne, S.",
+                                "year": "2024",
+                                "subcategory": "Simulation / high-performance computing",
+                                "suitability": "Low"
+                        },
+                        {
+                                "title": "Linking Reimbursement to Patient Benefits for Advanced Therapy Medicinal Products and Other High-Cost Innovations: Policy Recommendations for Outcomes-Based Agreements in Europe",
+                                "author": "Av_ar, T. S.",
+                                "year": "2024",
+                                "subcategory": "Emerging innovation risk & implementation frameworks",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "A framework for examining the function of digital health technologies for weight management",
+                                "author": "Azar, K. M. J.",
+                                "year": "2018",
+                                "subcategory": "Digital health / AI evaluation frameworks",
+                                "suitability": "Low"
+                        },
+                        {
+                                "title": "Trans Tasman Radiation Oncology Group: Development of the Assessment of New Radiation Oncology Technology and Treatments (ANROTAT) Framework",
+                                "author": "Duchesne, G. M.",
+                                "year": "2015",
+                                "subcategory": "Simulation / high-performance computing",
+                                "suitability": "Low"
+                        },
+                        {
+                                "title": "Empirical Estimates of the Marginal Cost of Health Produced by a Healthcare System: Methodological Considerations from Country-Level Estimates",
+                                "author": "Edney, L. C.",
+                                "year": "2022",
+                                "subcategory": "Simulation / high-performance computing",
+                                "suitability": "Low"
+                        },
+                        {
+                                "title": "Implementing a sandbox approach in health technology assessment: benefits and recommendations",
+                                "author": "Elvidge, J.",
+                                "year": "2024",
+                                "subcategory": "Emerging innovation risk & implementation frameworks",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Knowledge translation and health technology reassessment: identifying synergy",
+                                "author": "Esmail, R.",
+                                "year": "2018",
+                                "subcategory": "Emerging innovation risk & implementation frameworks",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "New or repurposed: a novel classification system for the horizon scanning of innovative medicines",
+                                "author": "Fairbairn, R.",
+                                "year": "2024",
+                                "subcategory": "Emerging innovation risk & implementation frameworks",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Suitability of the Current Health Technology Assessment of Innovative Artificial Intelligence-Based Medical Devices: Scoping Literature Review",
+                                "author": "Farah, L.",
+                                "year": "2024",
+                                "subcategory": "Emerging innovation risk & implementation frameworks",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "A framework for local-level economic evaluation to inform implementation decisions: health service interventions to prevent hospital-acquired hypoglycemia",
+                                "author": "Gray, J.",
+                                "year": "2023",
+                                "subcategory": "Simulation / high-performance computing",
+                                "suitability": "Low"
+                        },
+                        {
+                                "title": "EUPATI and Patients in Medicines Research and Development: Guidance for Patient Involvement in Regulatory Processes",
+                                "author": "Haerry, D.",
+                                "year": "2018",
+                                "subcategory": "Emerging innovation risk & implementation frameworks",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Implementation of a new Digi-HTA process for digital health technologies in Finland",
+                                "author": "Haverinen, J.",
+                                "year": "2022",
+                                "subcategory": "Digital health / AI evaluation frameworks",
+                                "suitability": "Low"
+                        },
+                        {
+                                "title": "Exploratory Approach to Incorporating Carbon Footprint in Health Technology Assessment (HTA) Modelling: Cost-Effectiveness Analysis of Health Interventions in the United Kingdom",
+                                "author": "Kindred, M.",
+                                "year": "2024",
+                                "subcategory": "Simulation / high-performance computing",
+                                "suitability": "Low"
+                        },
+                        {
+                                "title": "A Conceptual Framework for Life-Cycle Health Technology Assessment",
+                                "author": "Kirwin, E.",
+                                "year": "2022",
+                                "subcategory": "Emerging innovation risk & implementation frameworks",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Implementation of coverage with evidence development schemes for medical devices: A decision tool for late technology adopter countries",
+                                "author": "Kov�cs, S.",
+                                "year": "2022",
+                                "subcategory": "Emerging innovation risk & implementation frameworks",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Evaluation in Life Cycle of Information Technology (ELICIT) framework: Supporting the innovation life cycle from business case assessment to summative evaluation",
+                                "author": "Kukhareva, P. V.",
+                                "year": "2022",
+                                "subcategory": "EHR-integrated innovation evaluation",
+                                "suitability": "Low"
+                        },
+                        {
+                                "title": "Assessing progression of health technology assessment implementation in Asia: a balanced scorecard for cross comparison of selected countries in Asia",
+                                "author": "Kumar, R.",
+                                "year": "2022",
+                                "subcategory": "Emerging innovation risk & implementation frameworks",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "\"The Construction Strategy of a decision - making transformation system in China's Health Technology Assessment: A typical international experience based on the \"\"3-phase\"\" analysis model for the health technology assessment decision-making transformation\"",
+                                "author": "Lanting, L. V.",
+                                "year": "2017",
+                                "subcategory": "Emerging innovation risk & implementation frameworks",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Health Technology Agency insights: Informing modification of a qualitative benefit risk framework for Health Technology Reassessment of prescription medications",
+                                "author": "Maloney, M. A.",
+                                "year": "2019",
+                                "subcategory": "Emerging innovation risk & implementation frameworks",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Proposing the \"Value- and Evidence-Based decision making and Practice\" (VEDMAP) framework for Priority-Setting and knowledge translation in low and Middle-Income Countries: A novel framework for Decision-Making in Low-and middle income countries like Malawi",
+                                "author": "Mfutso-Bengo, J.",
+                                "year": "2023",
+                                "subcategory": "Emerging innovation risk & implementation frameworks",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "The Lean and Agile Multi-dimensional Process (LAMP) - a new framework for rapid and iterative evidence generation to support health-care technology design and development",
+                                "author": "Ni, M.",
+                                "year": "2020",
+                                "subcategory": "Precision medicine / genomic frameworks",
+                                "suitability": "Low"
+                        },
+                        {
+                                "title": "Framework for the analysis of nanotechnologies' impacts and ethical acceptability: basis of an interdisciplinary approach to assessing novel technologies",
+                                "author": "Patenaude, J.",
+                                "year": "2015",
+                                "subcategory": "Emerging innovation risk & implementation frameworks",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "A New Method to Determine the Optimal Willingness to Pay in Cost-Effectiveness Analysis",
+                                "author": "Phelps, C. E.",
+                                "year": "2019",
+                                "subcategory": "Emerging innovation risk & implementation frameworks",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "Artificial Intelligence in health care with a focus on hospitals: methodological considerations for health technology assessment: a scoping review",
+                                "author": "Riegelnegg, M.",
+                                "year": "2024",
+                                "subcategory": "Digital health / AI evaluation frameworks",
+                                "suitability": "Low"
+                        },
+                        {
+                                "title": "Rapid evaluation of service innovations in health and social care: key considerations",
+                                "author": "Smith, J.",
+                                "year": "2023",
+                                "subcategory": "Emerging innovation risk & implementation frameworks",
+                                "suitability": "Moderate"
+                        },
+                        {
+                                "title": "The GetReal Trial Tool: design, assess and discuss clinical drug trials in light of Real World Evidence generation",
+                                "author": "Zuidgeest, M. G. P.",
+                                "year": "2022",
+                                "subcategory": "Emerging innovation risk & implementation frameworks",
+                                "suitability": "Moderate"
+                        }
+                ]
+        },
+        "Policy, Coverage & Reimbursement": {
+                "subcategorias": [
+                        {
+                                "nombre": "Pricing frameworks / opportunity cost",
+                                "count": 7
+                        },
+                        {
+                                "nombre": "Coverage pathways & funding models",
+                                "count": 3
+                        },
+                        {
+                                "nombre": "Outcome-based agreements (OBA)",
+                                "count": 2
+                        }
+                ],
+                "total": 12,
+                "estudios": [
+                        {
+                                "title": "Outcome-based reimbursement in Central-Eastern Europe and Middle-East",
+                                "author": "�d�m, I.",
+                                "year": "2022",
+                                "subcategory": "Outcome-based agreements (OBA)",
+                                "suitability": "Not applicable"
+                        },
+                        {
+                                "title": "[Not Available]",
+                                "author": "Adenot, I.",
+                                "year": "2020",
+                                "subcategory": "Coverage pathways & funding models",
+                                "suitability": "Not applicable"
+                        },
+                        {
+                                "title": "Recalibrating Health Technology Assessment Methods for Cell and Gene Therapies",
+                                "author": "Angelis, A.",
+                                "year": "2020",
+                                "subcategory": "Outcome-based agreements (OBA)",
+                                "suitability": "Not applicable"
+                        },
+                        {
+                                "title": "Intrinsic properties of medical devices: considerations for economic evaluation",
+                                "author": "Basu, R.",
+                                "year": "2019",
+                                "subcategory": "Pricing frameworks / opportunity cost",
+                                "suitability": "Not applicable"
+                        },
+                        {
+                                "title": "A theory on ICER pricing and optimal levels of cost-effectiveness thresholds: a bargaining approach",
+                                "author": "Berdud, M.",
+                                "year": "2023",
+                                "subcategory": "Pricing frameworks / opportunity cost",
+                                "suitability": "Not applicable"
+                        },
+                        {
+                                "title": "Establishing a reasonable price for an orphan drug",
+                                "author": "Berdud, M.",
+                                "year": "2020",
+                                "subcategory": "Pricing frameworks / opportunity cost",
+                                "suitability": "Not applicable"
+                        },
+                        {
+                                "title": "Critical Review of European Health-Economic Guidelines for the Health Technology Assessment of Medical Devices",
+                                "author": "Bl�her, M.",
+                                "year": "2019",
+                                "subcategory": "Pricing frameworks / opportunity cost",
+                                "suitability": "Not applicable"
+                        },
+                        {
+                                "title": "Paying For Value From Costly Medical Technologies: A Framework For Applying Value-Based Payment Reforms",
+                                "author": "Lopez, M. H.",
+                                "year": "2020",
+                                "subcategory": "Pricing frameworks / opportunity cost",
+                                "suitability": "Not applicable"
+                        },
+                        {
+                                "title": "Challenges in the Evaluation of Emerging Highly Specialised Technologies: Is There a Role for Living HTA?",
+                                "author": "Merlin, T.",
+                                "year": "2023",
+                                "subcategory": "Coverage pathways & funding models",
+                                "suitability": "Not applicable"
+                        },
+                        {
+                                "title": "Can Generalized Cost-Effectiveness Analysis Leverage Meaningful Use of Novel Value Elements in Pharmacoeconomics to Inform Medicare Drug Price Negotiation?",
+                                "author": "Padula, W. V.",
+                                "year": "2024",
+                                "subcategory": "Pricing frameworks / opportunity cost",
+                                "suitability": "Not applicable"
+                        },
+                        {
+                                "title": "Value-based reimbursement decisions for orphan drugs: a scoping review and decision framework",
+                                "author": "Paulden, M.",
+                                "year": "2015",
+                                "subcategory": "Coverage pathways & funding models",
+                                "suitability": "Not applicable"
+                        },
+                        {
+                                "title": "Achieving dynamic efficiency in pharmaceutical innovation: Identifying the optimal share of value and payments required",
+                                "author": "Woods, B.",
+                                "year": "2024",
+                                "subcategory": "Pricing frameworks / opportunity cost",
+                                "suitability": "Not applicable"
+                        }
+                ]
+        },
+        "Unclassified": {
+                "subcategorias": [
+                        {
+                                "nombre": "Unclassified",
+                                "count": 10
+                        }
+                ],
+                "total": 10,
+                "estudios": [
+                        {
+                                "title": "Reflections on the Importance of Cost of Illness Analysis in Rare Diseases: A Proposal",
+                                "author": "Armeni, P.",
+                                "year": "2021",
+                                "subcategory": "Unclassified",
+                                "suitability": "Not applicable"
+                        },
+                        {
+                                "title": "Collecting Physicians' Preferences on Medical Devices: Are We Doing It Right? Evidence from Italian Orthopedists Using 2 Different Stated Preference Methods",
+                                "author": "Armeni, P.",
+                                "year": "2023",
+                                "subcategory": "Unclassified",
+                                "suitability": "Not applicable"
+                        },
+                        {
+                                "title": "Does Cost-Effectiveness Analysis Overvalue Potential Cures? Exploring Alternative Methods for Applying a \"Shared Savings\" Approach to Cost Offsets",
+                                "author": "Chapman, R. H.",
+                                "year": "2021",
+                                "subcategory": "Unclassified",
+                                "suitability": "Not applicable"
+                        },
+                        {
+                                "title": "Time to Review the Role of Surrogate End Points in Health Policy: State of the Art and the Way Forward",
+                                "author": "Ciani, O.",
+                                "year": "2017",
+                                "subcategory": "Unclassified",
+                                "suitability": "Not applicable"
+                        },
+                        {
+                                "title": "Advancing the role of real-world evidence in comparative effectiveness research",
+                                "author": "Daigl, M.",
+                                "year": "2024",
+                                "subcategory": "Unclassified",
+                                "suitability": "Not applicable"
+                        },
+                        {
+                                "title": "An evidence-based framework for identifying technologies of no or low-added value (NLVT)",
+                                "author": "Esandi, M. E.",
+                                "year": "2020",
+                                "subcategory": "Unclassified",
+                                "suitability": "Not applicable"
+                        },
+                        {
+                                "title": "Toward a Method for Exposing and Elucidating Ethical Issues with Human Cognitive Enhancement Technologies",
+                                "author": "Hofmann, B.",
+                                "year": "2017",
+                                "subcategory": "Unclassified",
+                                "suitability": "Not applicable"
+                        },
+                        {
+                                "title": "COMPREHENSIVE ASSESSMENT OF COMPLEX TECHNOLOGIES: INTEGRATING VARIOUS ASPECTS IN HEALTH TECHNOLOGY ASSESSMENT",
+                                "author": "Lysdahl, K. B.",
+                                "year": "2017",
+                                "subcategory": "Unclassified",
+                                "suitability": "Not applicable"
+                        },
+                        {
+                                "title": "Rapid qualitative evidence syntheses (rQES) in health technology assessment: experiences, challenges, and lessons",
+                                "author": "Majid, U.",
+                                "year": "2020",
+                                "subcategory": "Unclassified",
+                                "suitability": "Not applicable"
+                        },
+                        {
+                                "title": "Health Technology Assessment for Vaccines Against Rare, Severe Infections: Properly Accounting for Serogroup B Meningococcal Vaccination's Full Social and Economic Benefits",
+                                "author": "Stawasz, A.",
+                                "year": "2020",
+                                "subcategory": "Unclassified",
+                                "suitability": "Not applicable"
+                        }
+                ]
+        }
+};
+
+        // Function to get CSS class for badge based on suitability level
+        function obtenerClaseBadge(suitability) {
+            const nivel = suitability.toLowerCase();
+            if (nivel.includes('high')) return 'badge-high';
+            if (nivel.includes('moderate')) return 'badge-moderate';
+            if (nivel.includes('low')) return 'badge-low';
+            return 'badge-na';
+        }
+
+        // Function to display subcategory details
+        function mostrarDetalles(categoria, total) {
+            const detallesDiv = document.getElementById('detalles');
+            const tituloDiv = document.getElementById('detalles-titulo');
+            const contenidoDiv = document.getElementById('detalles-contenido');
+            
+            if (!datosSubcategorias[categoria]) {
+                contenidoDiv.innerHTML = '<p>No information available for this category.</p>';
+                detallesDiv.style.display = 'block';
+                return;
+            }
+            
+            const datos = datosSubcategorias[categoria];
+            tituloDiv.textContent = `📁 ${categoria} - ${total} studies`;
+            
+            let html = '<div style="margin-top: 15px;">';
+            html += '<h3 style="color: #34495e; margin-bottom: 15px;">Subcategories:</h3>';
+            
+            datos.subcategorias.forEach(function(subcat) {
+                const porcentaje = ((subcat.count / total) * 100).toFixed(1);
+                html += `
+                    <div class="subcategoria-item">
+                        <span class="subcategoria-nombre">${subcat.nombre}</span>
+                        <span class="subcategoria-count">${subcat.count} studies (${porcentaje}%)</span>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            contenidoDiv.innerHTML = html;
+            detallesDiv.style.display = 'block';
+        }
+
+        // Function to display studies table
+        function mostrarTablaEstudios(categoria, total) {
+            const tablaDiv = document.getElementById('tabla-estudios');
+            const tablaTitulo = document.getElementById('tabla-titulo');
+            const tablaBody = document.getElementById('tabla-estudios-body');
+            
+            if (!datosSubcategorias[categoria] || !datosSubcategorias[categoria].estudios) {
+                tablaBody.innerHTML = '<tr><td colspan="6">No studies available for this category.</td></tr>';
+                tablaDiv.style.display = 'block';
+                return;
+            }
+            
+            const estudios = datosSubcategorias[categoria].estudios;
+            tablaTitulo.textContent = `📋 Studies List: ${categoria} (${total} studies)`;
+            
+            // Clear table
+            tablaBody.innerHTML = '';
+            
+            // Add each study to the table
+            estudios.forEach(function(estudio, index) {
+                const row = document.createElement('tr');
+                const badgeClass = obtenerClaseBadge(estudio.suitability);
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${estudio.title}</td>
+                    <td>${estudio.author}</td>
+                    <td>${estudio.year}</td>
+                    <td>${estudio.subcategory}</td>
+                    <td><span class="badge ${badgeClass}">${estudio.suitability}</span></td>
+                `;
+                tablaBody.appendChild(row);
+            });
+            
+            // Show the table
+            tablaDiv.style.display = 'block';
+            
+            // Smooth scroll to the table
+            tablaDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Function to configure Plotly event listeners
+        function configurarInteractividad() {
+            // Find all Plotly graph elements
+            const allPlotDivs = document.querySelectorAll('[id*="plotly"], .plotly-graph-div');
+            
+            allPlotDivs.forEach(function(plotDiv) {
+                // Check if the graph already has data and doesn't have the handler
+                if (plotDiv.data && !plotDiv._clickHandlerAdded) {
+                    plotDiv._clickHandlerAdded = true;
+                    
+                    // Add event listener for clicks
+                    plotDiv.on('plotly_click', function(data) {
+                        if (data.points && data.points.length > 0) {
+                            const punto = data.points[0];
+                            const categoria = punto.x;
+                            const count = punto.y;
+                            
+                            // Show subcategory details
+                            mostrarDetalles(categoria, count);
+                            
+                            // Show studies table
+                            mostrarTablaEstudios(categoria, count);
+                        }
+                    });
+                }
+            });
+            
+            // If no graph found, try again after a delay
+            if (allPlotDivs.length === 0 || !Array.from(allPlotDivs).some(d => d.data)) {
+                setTimeout(configurarInteractividad, 500);
+            }
+        }
+
+        // Function to wait for Plotly to be available
+        function esperarPlotly() {
+            if (window.Plotly) {
+                // Plotly is loaded, wait for DOM to be ready
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', configurarInteractividad);
+                } else {
+                    // DOM is already ready, but wait a bit more for Plotly to render
+                    setTimeout(configurarInteractividad, 300);
+                }
+            } else {
+                // Plotly is not loaded yet, try again
+                setTimeout(esperarPlotly, 100);
+            }
+        }
+
+        // Start waiting when page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', esperarPlotly);
+        } else {
+            esperarPlotly();
+        }
+    </script>
+</body>
+</html>
