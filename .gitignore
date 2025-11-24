@@ -42,6 +42,8 @@ Thumbs.db
 *.png
 *.html
 !grafico_interactivo.html
+# Allow HTML files in docs/ for GitHub Pages
+!docs/*.html
 
 # Jupyter Notebook
 .ipynb_checkpoints
