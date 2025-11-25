@@ -20,7 +20,7 @@ except ImportError:
     MATPLOTLIB_DISPONIBLE = False
 
 
-CSV_FILE = "este_TCIM_195_scored_final.csv"
+CSV_FILE = "data/este_TCIM_195_scored_final.csv"
 CATEGORY_FIELD = "Category"
 SUBCATEGORY_FIELD = "Subcategory"
 ENCODINGS = ["utf-8", "latin-1", "iso-8859-1", "cp1252", "utf-8-sig"]

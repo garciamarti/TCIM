@@ -45,7 +45,7 @@ def contar_lineas_csv(archivo_csv):
 
 if __name__ == "__main__":
     # Nombre del archivo CSV
-    archivo = "este_TCIM_195_scored_final.csv"
+    archivo = "data/este_TCIM_195_scored_final.csv"
     
     # Verificar que el archivo existe
     if not os.path.exists(archivo):

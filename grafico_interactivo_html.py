@@ -19,7 +19,7 @@ except ImportError:
     PLOTLY_DISPONIBLE = False
 
 
-CSV_FILE = "este_TCIM_195_scored_final.csv"
+CSV_FILE = "data/este_TCIM_195_scored_final.csv"
 CATEGORY_FIELD = "Category"
 SUBCATEGORY_FIELD = "Subcategory"
 SUITABILITY_FIELD = "TCIM_suitability_level"
@@ -702,8 +702,9 @@ def crear_grafico_html_interactivo(
 </body>
 </html>"""
 
-    # Guardar el HTML
-    nombre_archivo = "grafico_interactivo.html"
+    # Guardar el HTML en la carpeta docs
+    os.makedirs('docs', exist_ok=True)  # Crear carpeta docs si no existe
+    nombre_archivo = "docs/grafico_interactivo.html"
     with open(nombre_archivo, 'w', encoding='utf-8') as f:
         f.write(html_completo)
     
