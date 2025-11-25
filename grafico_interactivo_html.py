@@ -22,6 +22,7 @@ except ImportError:
 CSV_FILE = "este_TCIM_195_scored_final.csv"
 CATEGORY_FIELD = "Category"
 SUBCATEGORY_FIELD = "Subcategory"
+SUITABILITY_FIELD = "TCIM_suitability_level"
 ENCODINGS = ["utf-8", "latin-1", "iso-8859-1", "cp1252", "utf-8-sig"]
 
 
@@ -58,33 +59,38 @@ def normalizar_texto(valor: str, texto_vacio: str = "Sin dato") -> str:
     return limpio if limpio else texto_vacio
 
 
-def agrupar_estudios(filas: List[Dict[str, str]]) -> Tuple[Counter, Dict[str, Counter], Dict[str, List[Dict]]]:
+def agrupar_estudios(filas: List[Dict[str, str]]) -> Tuple[Counter, Dict[str, Counter], Dict[str, List[Dict]], Dict[str, Counter]]:
     """
-    Agrupa y cuenta los estudios por categoría y subcategoría.
+    Agrupa y cuenta los estudios por categoría, subcategoría y nivel de aplicabilidad TCIM.
 
     Returns:
         Un Counter por categoría, un dict {categoria: Counter(subcategorias)},
-        y un dict con los estudios completos por categoría.
+        un dict con los estudios completos por categoría,
+        y un dict {categoria: Counter(suitability_levels)}.
     """
     categorias = Counter()
     subcategorias_por_categoria: Dict[str, Counter] = defaultdict(Counter)
     estudios_por_categoria: Dict[str, List[Dict]] = defaultdict(list)
+    suitability_por_categoria: Dict[str, Counter] = defaultdict(Counter)
 
     for fila in filas:
         categoria = normalizar_texto(fila.get(CATEGORY_FIELD), "Sin categoría")
         subcategoria = normalizar_texto(fila.get(SUBCATEGORY_FIELD), "Sin subcategoría")
+        suitability = normalizar_texto(fila.get(SUITABILITY_FIELD), "Not applicable")
 
         categorias[categoria] += 1
         subcategorias_por_categoria[categoria][subcategoria] += 1
         estudios_por_categoria[categoria].append(fila)
+        suitability_por_categoria[categoria][suitability] += 1
 
-    return categorias, subcategorias_por_categoria, estudios_por_categoria
+    return categorias, subcategorias_por_categoria, estudios_por_categoria, suitability_por_categoria
 
 
 def crear_grafico_html_interactivo(
     categorias: Counter,
     subcategorias_por_categoria: Dict[str, Counter],
-    estudios_por_categoria: Dict[str, List[Dict]]
+    estudios_por_categoria: Dict[str, List[Dict]],
+    suitability_por_categoria: Dict[str, Counter]
 ) -> None:
     """Crea un gráfico de barras interactivo en HTML con Plotly."""
     if not PLOTLY_DISPONIBLE:
@@ -92,49 +98,69 @@ def crear_grafico_html_interactivo(
         print("   pip install plotly")
         return
 
-    # Preparar datos
+    # Preparar datos para barras apiladas
     categorias_ordenadas = categorias.most_common()
     nombres = [cat for cat, _ in categorias_ordenadas]
-    valores = [count for _, count in categorias_ordenadas]
-    total = sum(valores)
-    porcentajes = [(v / total) * 100 for v in valores]
-
-    # Crear texto para hover (información al pasar el mouse)
-    hover_texts = []
-    for categoria in nombres:
-        count = categorias[categoria]
-        porcentaje = (count / total) * 100
-        subcats = subcategorias_por_categoria[categoria]
-        subcats_text = "<br>".join([f"  • {subcat}: {count}" for subcat, count in subcats.most_common()[:5]])
-        hover_texts.append(
-            f"<b>{categoria}</b><br>"
-            f"Total: {count} studies ({porcentaje:.1f}%)<br>"
-            f"<br>Subcategories:<br>{subcats_text}"
-        )
-
-    # Crear el gráfico de barras con estilo moderno
-    # Usar gradiente de colores similar al estilo de las tablas
-    colors = ['#3498db', '#2980b9', '#5dade2', '#1abc9c', '#16a085', '#27ae60']
-    bar_colors = [colors[i % len(colors)] for i in range(len(nombres))]
+    total = sum([count for _, count in categorias_ordenadas])
     
-    fig = go.Figure(data=[
-        go.Bar(
+    # Definir niveles de aplicabilidad y sus colores
+    suitability_levels = ['High', 'Moderate', 'Low', 'Not applicable']
+    suitability_colors = {
+        'High': '#2ecc71',           # Verde
+        'Moderate': '#f39c12',       # Naranja
+        'Low': '#e74c3c',            # Rojo
+        'Not applicable': '#95a5a6'  # Gris
+    }
+    
+    # Preparar datos apilados para cada nivel de aplicabilidad
+    stacked_data = {}
+    for level in suitability_levels:
+        stacked_data[level] = []
+        for categoria in nombres:
+            count = suitability_por_categoria[categoria].get(level, 0)
+            stacked_data[level].append(count)
+    
+    # Crear el gráfico de barras apiladas
+    fig = go.Figure()
+    
+    # Agregar una barra para cada nivel de aplicabilidad
+    for level in suitability_levels:
+        fig.add_trace(go.Bar(
+            name=level,
             x=nombres,
-            y=valores,
-            text=[f"{v}<br>({p:.1f}%)" for v, p in zip(valores, porcentajes)],
-            textposition='outside',
-            textfont=dict(size=11, color='#2c3e50', family='Segoe UI, Tahoma, Geneva, Verdana, sans-serif'),
-            hovertext=hover_texts,
-            hoverinfo='text',
+            y=stacked_data[level],
             marker=dict(
-                color=bar_colors,
-                line=dict(color='#2980b9', width=2),
+                color=suitability_colors[level],
+                line=dict(color='#2c3e50', width=1),
                 opacity=0.85
             ),
-            # Agregar IDs únicos para cada barra para el JavaScript
-            customdata=[i for i in range(len(nombres))],
-        )
-    ])
+            text=[f"<b>{count}</b>" if count > 0 else "" for count in stacked_data[level]],
+            textposition='inside',
+            textfont=dict(size=11, color='white', family='Segoe UI, Tahoma, Geneva, Verdana, sans-serif'),
+            hovertemplate=f"<b>{level}</b><br>" +
+                         "Category: %{x}<br>" +
+                         "Count: %{y}<br>" +
+                         "<extra></extra>"
+        ))
+    
+    # Agregar texto con el total en la parte superior de cada barra (más visible y destacado)
+    valores_totales = [categorias[cat] for cat in nombres]
+    porcentajes = [(v / total) * 100 for v in valores_totales]
+    max_valor = max(valores_totales)
+    
+    # Calcular posición Y basada en el valor máximo para que todas las barras tengan la misma altura de texto
+    # Esto asegura que las barras más cortas también tengan sus números bien posicionados
+    y_positions = [max_valor * 1.25 for _ in valores_totales]  # Posición fija basada en el máximo
+    
+    fig.add_trace(go.Scatter(
+        x=nombres,
+        y=y_positions,  # Usar posición fija basada en el valor máximo
+        mode='text',
+        text=[f"<b>{v}</b><br><b>({p:.1f}%)</b>" for v, p in zip(valores_totales, porcentajes)],
+        textfont=dict(size=16, color='#1a252f', family='Segoe UI, Tahoma, Geneva, Verdana, sans-serif'),
+        showlegend=False,
+        hoverinfo='skip'
+    ))
 
     # Personalizar el layout con estilo moderno
     fig.update_layout(
@@ -162,13 +188,22 @@ def crear_grafico_html_interactivo(
             linecolor='#bdc3c7',
             linewidth=1,
             showgrid=True,
-            range=[0, max(valores) * 1.15]  # Aumentar el rango para que el texto quepa
+            range=[0, max_valor * 1.35]  # Aumentar el rango aún más para que el texto quepa completamente
         ),
         plot_bgcolor='#ffffff',
         paper_bgcolor='#ffffff',
-        height=600,
-        margin=dict(b=120, l=80, r=40, t=120, pad=10),  # Aumentar margen superior y agregar padding
+        height=650,  # Aumentar altura del gráfico
+        margin=dict(b=120, l=80, r=40, t=180, pad=20),  # Aumentar margen superior aún más
         hovermode='closest',
+        barmode='stack',  # Modo apilado para las barras
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.12,  # Mover la leyenda aún más arriba para no interferir con los totales
+            xanchor="right",
+            x=1,
+            font=dict(size=12, family='Segoe UI, Tahoma, Geneva, Verdana, sans-serif')
+        ),
         hoverlabel=dict(
             bgcolor='#2c3e50',
             font_size=12,
@@ -319,6 +354,41 @@ def crear_grafico_html_interactivo(
             padding: 12px;
             text-align: left;
             font-weight: bold;
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+        }}
+        table th.sortable {{
+            padding-right: 30px;
+        }}
+        table th.sortable:hover {{
+            background-color: #2980b9;
+        }}
+        table th .sort-icon {{
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            opacity: 0.8;
+            font-weight: bold;
+        }}
+        table th .sort-icon::after {{
+            content: '⇅';
+            opacity: 0.8;
+        }}
+        table th.sortable:hover .sort-icon::after {{
+            opacity: 1;
+        }}
+        table th.sort-asc .sort-icon::after {{
+            content: '▲';
+            opacity: 1;
+            color: #ffffff;
+        }}
+        table th.sort-desc .sort-icon::after {{
+            content: '▼';
+            opacity: 1;
+            color: #ffffff;
         }}
         table td {{
             padding: 10px;
@@ -375,10 +445,10 @@ def crear_grafico_html_interactivo(
                         <tr>
                             <th>#</th>
                             <th>Title</th>
-                            <th>Author</th>
-                            <th>Year</th>
-                            <th>Subcategory</th>
-                            <th>TCIM Suitability Level</th>
+                            <th class="sortable" data-sort="author">Author <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="year">Year <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="subcategory">Subcategory <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="suitability">TCIM Suitability Level <span class="sort-icon"></span></th>
                         </tr>
                     </thead>
                     <tbody id="tabla-estudios-body">
@@ -432,27 +502,22 @@ def crear_grafico_html_interactivo(
             html += '</div>';
             contenidoDiv.innerHTML = html;
             detallesDiv.style.display = 'block';
+            
+            // Scroll suave hacia el panel de subcategorías
+            setTimeout(function() {{
+                detallesDiv.scrollIntoView({{ behavior: 'smooth', block: 'start' }});
+            }}, 100);
         }}
 
-        // Function to display studies table
-        function mostrarTablaEstudios(categoria, total) {{
-            const tablaDiv = document.getElementById('tabla-estudios');
-            const tablaTitulo = document.getElementById('tabla-titulo');
+        // Variable para almacenar los estudios actuales y el orden actual
+        let estudiosActuales = [];
+        let ordenActual = {{ column: null, direction: 'asc' }};
+
+        // Function to render table rows
+        function renderizarFilasTabla(estudios) {{
             const tablaBody = document.getElementById('tabla-estudios-body');
-            
-            if (!datosSubcategorias[categoria] || !datosSubcategorias[categoria].estudios) {{
-                tablaBody.innerHTML = '<tr><td colspan="6">No studies available for this category.</td></tr>';
-                tablaDiv.style.display = 'block';
-                return;
-            }}
-            
-            const estudios = datosSubcategorias[categoria].estudios;
-            tablaTitulo.textContent = `📋 Studies List: ${{categoria}} (${{total}} studies)`;
-            
-            // Clear table
             tablaBody.innerHTML = '';
             
-            // Add each study to the table
             estudios.forEach(function(estudio, index) {{
                 const row = document.createElement('tr');
                 const badgeClass = obtenerClaseBadge(estudio.suitability);
@@ -467,12 +532,105 @@ def crear_grafico_html_interactivo(
                 `;
                 tablaBody.appendChild(row);
             }});
+        }}
+
+        // Function to sort table
+        function ordenarTabla(column) {{
+            if (estudiosActuales.length === 0) return;
+            
+            // Toggle direction if clicking the same column
+            if (ordenActual.column === column) {{
+                ordenActual.direction = ordenActual.direction === 'asc' ? 'desc' : 'asc';
+            }} else {{
+                ordenActual.column = column;
+                ordenActual.direction = 'asc';
+            }}
+            
+            // Sort studies
+            const estudiosOrdenados = [...estudiosActuales].sort(function(a, b) {{
+                let aVal = a[column];
+                let bVal = b[column];
+                
+                // Handle different data types
+                if (column === 'year') {{
+                    // Sort by year as number
+                    aVal = parseInt(aVal) || 0;
+                    bVal = parseInt(bVal) || 0;
+                }} else {{
+                    // Sort as string (case insensitive)
+                    aVal = (aVal || '').toString().toLowerCase();
+                    bVal = (bVal || '').toString().toLowerCase();
+                }}
+                
+                if (aVal < bVal) return ordenActual.direction === 'asc' ? -1 : 1;
+                if (aVal > bVal) return ordenActual.direction === 'asc' ? 1 : -1;
+                return 0;
+            }});
+            
+            // Update sort indicators
+            document.querySelectorAll('th.sortable').forEach(function(th) {{
+                th.classList.remove('sort-asc', 'sort-desc');
+                if (th.dataset.sort === column) {{
+                    th.classList.add(ordenActual.direction === 'asc' ? 'sort-asc' : 'sort-desc');
+                }}
+            }});
+            
+            // Re-render table
+            renderizarFilasTabla(estudiosOrdenados);
+        }}
+
+        // Function to display studies table
+        function mostrarTablaEstudios(categoria, total) {{
+            const tablaDiv = document.getElementById('tabla-estudios');
+            const tablaTitulo = document.getElementById('tabla-titulo');
+            const tablaBody = document.getElementById('tabla-estudios-body');
+            
+            if (!datosSubcategorias[categoria] || !datosSubcategorias[categoria].estudios) {{
+                tablaBody.innerHTML = '<tr><td colspan="6">No studies available for this category.</td></tr>';
+                tablaDiv.style.display = 'block';
+                return;
+            }}
+            
+            estudiosActuales = datosSubcategorias[categoria].estudios;
+            tablaTitulo.textContent = `📋 Studies List: ${{categoria}} (${{total}} studies)`;
+            
+            // Reset sort
+            ordenActual = {{ column: null, direction: 'asc' }};
+            document.querySelectorAll('th.sortable').forEach(function(th) {{
+                th.classList.remove('sort-asc', 'sort-desc');
+            }});
+            
+            // Render initial table
+            renderizarFilasTabla(estudiosActuales);
+            
+            // Re-configure sort listeners after rendering
+            configurarOrdenamientoTabla();
             
             // Show the table
             tablaDiv.style.display = 'block';
             
-            // Smooth scroll to the table
-            tablaDiv.scrollIntoView({{ behavior: 'smooth', block: 'start' }});
+            // Don't scroll to table, let it stay where subcategories are
+        }}
+
+        // Add click event listeners to sortable headers
+        function configurarOrdenamientoTabla() {{
+            // Remove existing listeners by using a flag
+            document.querySelectorAll('th.sortable').forEach(function(th) {{
+                // Remove old listener if exists
+                if (th._sortHandler) {{
+                    th.removeEventListener('click', th._sortHandler);
+                }}
+                
+                // Create new handler
+                th._sortHandler = function(e) {{
+                    e.preventDefault();
+                    e.stopPropagation();
+                    ordenarTabla(th.dataset.sort);
+                }};
+                
+                // Add new event listener
+                th.addEventListener('click', th._sortHandler);
+            }});
         }}
 
         // Function to configure Plotly event listeners
@@ -513,10 +671,16 @@ def crear_grafico_html_interactivo(
             if (window.Plotly) {{
                 // Plotly is loaded, wait for DOM to be ready
                 if (document.readyState === 'loading') {{
-                    document.addEventListener('DOMContentLoaded', configurarInteractividad);
+                    document.addEventListener('DOMContentLoaded', function() {{
+                        configurarInteractividad();
+                        configurarOrdenamientoTabla();
+                    }});
                 }} else {{
                     // DOM is already ready, but wait a bit more for Plotly to render
-                    setTimeout(configurarInteractividad, 300);
+                    setTimeout(function() {{
+                        configurarInteractividad();
+                        configurarOrdenamientoTabla();
+                    }}, 300);
                 }}
             }} else {{
                 // Plotly is not loaded yet, try again
@@ -526,9 +690,13 @@ def crear_grafico_html_interactivo(
 
         // Start waiting when page loads
         if (document.readyState === 'loading') {{
-            document.addEventListener('DOMContentLoaded', esperarPlotly);
+            document.addEventListener('DOMContentLoaded', function() {{
+                esperarPlotly();
+                configurarOrdenamientoTabla();
+            }});
         }} else {{
             esperarPlotly();
+            configurarOrdenamientoTabla();
         }}
     </script>
 </body>
@@ -550,8 +718,8 @@ def main() -> None:
         print("The file contains no data.")
         return
 
-    categorias, subcategorias_por_categoria, estudios_por_categoria = agrupar_estudios(filas)
-    crear_grafico_html_interactivo(categorias, subcategorias_por_categoria, estudios_por_categoria)
+    categorias, subcategorias_por_categoria, estudios_por_categoria, suitability_por_categoria = agrupar_estudios(filas)
+    crear_grafico_html_interactivo(categorias, subcategorias_por_categoria, estudios_por_categoria, suitability_por_categoria)
 
 
 if __name__ == "__main__":
